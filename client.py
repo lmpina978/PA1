@@ -1,6 +1,6 @@
 import socket 
 
-# clientSocket 
+clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Close socket
-.close()
+clientSocket.close()
