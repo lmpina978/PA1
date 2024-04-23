@@ -20,4 +20,4 @@ print("Message received!")
 # Print Message from client
 
 # Close socket
-.close()
+serverSocket.close()
