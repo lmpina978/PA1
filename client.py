@@ -11,10 +11,11 @@ max = 1024
 txtfile = open("untitled.txt", "r")
 txtdata = txtfile.read()
 
-# Check if data is string 
+# Check if data is string and get size in bytes 
 stringcheck = isinstance(txtdata, str)
+stringsize = os.path.getsize("untitled.txt")
 
-if stringcheck and txtdata.length() <= max:
+if stringcheck and (stringsize <= max):
   
 # Get byte amount of file and see if it exceeds max
 
