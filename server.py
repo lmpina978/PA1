@@ -9,7 +9,7 @@ serverSocket.listen(1)
 # Indicator that message has been received
 print("Message received!")
 
-
+# Print Message from client
 
 # Close socket
 .close()
