@@ -1,26 +1,28 @@
 import socket
+import sys
+import os
 
-# Find port to listen to 
+# Create client socket
+clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+# Specify max amount of bytes to be sent in each packet
+max = 1024
 
-# Create socket
-serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# Will count the amount of packets that were sent from client to server
+packetCount = 0
 
-# Implement limit of bytes that can be received
-max_bytes = 1024
+# Open file for string
+txtfile = open("untitled.txt", "r")
+filename = sys.argv[1]
 
-# Listens for incoming connections, 1 can be changed as the value, keep it that for now
-serverSocket.listen(1)
+print("Opening " + filename)
 
-print("Server ready to receive.")
+txtdata = txtfile.read()
 
+# Check if data is string and get size in bytes
+stringcheck = isinstance(txtdata, str)
+stringsize = os.path.getsize("untitled.txt")
 
-
-
-# Indicator that message has been received
-print("Message received!")
-
-# Print Message from client
 
 # Close socket
-serverSocket.close()
+clientSocket.close()
