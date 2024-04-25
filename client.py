@@ -12,7 +12,7 @@ max = 1024
 txtfile = open("untitled.txt", "r")
 filename = sys.argv[1]
 
-print("Opening " + filename)
+print("Opening " + filename + "..." )
 
 txtdata = txtfile.read()
 
