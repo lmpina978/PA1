@@ -1,7 +1,7 @@
 # Team Members: 
 - Kyle Lee -
 - Daniel Currey -
-- Brett Chiu -
+- Brett Chiu - brettc@csu.fullerton.edu
 - Luke Pina -
 - Jonathan Gaytan - jagaytan@csu.fullerton.edu
 
