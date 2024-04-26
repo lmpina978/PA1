@@ -5,14 +5,17 @@ import os
 # Create client socket
 clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# Specify max amount of bytes to be sent
+# Specify max amount of bytes to be sent in each packet
 max = 1024
+
+# Will count the amount of packets that were sent from client to server
+packetCount = 0
 
 # Open file for string
 txtfile = open("untitled.txt", "r")
 filename = sys.argv[1]
 
-print("Opening " + filename + "..." )
+print("Opening " + filename)
 
 txtdata = txtfile.read()
 
@@ -21,10 +24,7 @@ stringcheck = isinstance(txtdata, str)
 stringsize = os.path.getsize("untitled.txt")
 
 
-if stringcheck and (stringsize <= max):
-    print("0")
-# Get byte amount of file and see if it exceeds max
 
-
+print("A total of " + packetCount + " packets and " + "0 bytes have been sent.")
 # Close socket
 clientSocket.close()
