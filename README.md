@@ -1,6 +1,6 @@
-# Team Members: 
+# Team Members:
 - Kyle Lee -
-- Daniel Currey -
+- Daniel Currey - dcurrey@csu.fullerton.edu
 - Brett Chiu - brettc@csu.fullerton.edu
 - Luke Pina -
 - Jonathan Gaytan - jagaytan@csu.fullerton.edu
@@ -12,7 +12,7 @@
 
 # Anything Special About Submission:
 
-# Objective: 
+# Objective:
 1. To understand the challenges of protocol design.
 2. To discover and appreciate the challenges of developing complex, real-world network applications.
 3. Make sense of real-world sockets programming APIs.
