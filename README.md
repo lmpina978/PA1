@@ -11,7 +11,7 @@
 # How To Execute Program:
 
 # Anything Special About Submission:
-
+- Has unit tests using .txt files in order to reinforce data partitioning, three for client unit test, five for server unit test
 # Objective: 
 1. To understand the challenges of protocol design.
 2. To discover and appreciate the challenges of developing complex, real-world network applications.
