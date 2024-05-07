@@ -5,7 +5,7 @@ import sys
 BUFFER_SIZE = 1024
 
 def start_server(server_port):
-  """Main function to start the server"""
+    """Main function to start the server"""
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind(('', server_port))
     server_socket.listen(1)
@@ -24,15 +24,15 @@ def start_server(server_port):
             send_message(control_socket, 'FAILURE')
 
 def send_message(any_socket, message):
-  """Sends message through given socket"""
+    """Sends message through given socket"""
     any_socket.send(message.encode())
 
 def receive_message(any_socket):
-  """Receives message from given socket"""
+    """Receives message from given socket"""
     return any_socket.recv(BUFFER_SIZE).decode()
 
 def handle_client(control_socket, client_address):
-  """Handle client requests"""
+    """Handle client requests"""
     while True:
         command = receive_message(control_socket)
 
@@ -50,9 +50,9 @@ def handle_client(control_socket, client_address):
             list_files(control_socket)
 
 def send_file(control_socket, file_name):
-  """Send a file to the client"""
+    """Send a file to the client"""
     print("In send_file function")
-
+    
     if os.path.isfile(os.path.join('files', file_name)):
         # Establish a new data channel
         data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -91,7 +91,7 @@ def send_file(control_socket, file_name):
         send_message(control_socket, 'FAILURE File not found.')
 
 def receive_file(control_socket, file_name):
-  """Receive a file from the client"""
+    """Receive a file from the client"""
     # Establish a new data channel
     data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     data_socket.bind(('', 0))  # Bind to an ephemeral port
@@ -119,7 +119,7 @@ def receive_file(control_socket, file_name):
     #send_message(control_socket, 'SUCCESS File received.')
 
 def list_files(control_socket):
-  """Send a list of files to the client"""
+    """Send a list of files to the client"""
     # Establish a new data channel
     data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     data_socket.bind(('', 0))  # Bind to an ephemeral port
@@ -152,4 +152,4 @@ def main():
     start_server(port)
 
 if __name__ == '__main__':
-    main()
+   main()

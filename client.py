@@ -5,7 +5,7 @@ import sys
 BUFFER_SIZE = 1024
 
 def connect_to_server(server_address, server_port):
-  """Establish a TCP connection to the server"""
+    """Establish a TCP connection to the server"""
     try:
         control_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error as error:
@@ -21,15 +21,15 @@ def connect_to_server(server_address, server_port):
     return control_socket
 
 def send_message(any_socket, message):
-  """Send a message to the server"""
+    """Send a message to the server"""
     any_socket.send(message.encode())
 
 def receive_message(any_socket):
-  """Receive a message from the server"""
+    """Receive a message from the server"""
     return any_socket.recv(BUFFER_SIZE).decode()
 
 def get_file(control_socket, file_name, server_address):
-  """Request and receive a file from the server"""
+    """Request and receive a file from the server"""
     send_message(control_socket, f'GET {file_name}')
     response = receive_message(control_socket)
 
@@ -63,7 +63,7 @@ def get_file(control_socket, file_name, server_address):
         print(response)
 
 def put_file(control_socket, file_name, server_address):
-  """Send a file to the server."""
+    """Send a file to the server."""
     if os.path.isfile(file_name):
         file_size = os.path.getsize(file_name)
         send_message(control_socket, f'PUT {file_name}')
@@ -100,7 +100,7 @@ def put_file(control_socket, file_name, server_address):
         print(f'Error: {file_name} not found.')
 
 def list_files(control_socket, server_address):
-  """Request a list of files from the server"""
+    """Request a list of files from the server"""
     send_message(control_socket, 'LS')
     response = receive_message(control_socket)
 
