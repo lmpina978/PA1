@@ -1,5 +1,5 @@
 # Team Members: 
-- Kyle Lee -
+- Kyle Lee - ipark604@csu.fullerton.edu
 - Daniel Currey -
 - Brett Chiu - brettc@csu.fullerton.edu
 - Luke Pina - lukepina@csu.fullerton.edu
