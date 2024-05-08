@@ -4,20 +4,20 @@ import sys
 
 BUFFER_SIZE = 1024
 
-def connect_to_server(server_address, server_port):
+def connect_to_server(server_machine, server_port):
     """Establish a TCP connection to the server"""
     try:
         control_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error as error:
-        print('Socket creation failed with error %s' %(error))
+        print('Socket creation failed with error %s.' % (error))
+        sys.exit(1)
     
     try:
-        server_address = socket.gethostbyname(server_address) 
-    except socket.gaierror: 
-        print ('There was an error resolving the host.')
-        sys.exit(1) 
-
-    control_socket.connect((server_address, server_port))
+        control_socket.connect((server_machine, server_port))
+    except socket.error as error:
+        print('Connection failed with error %s.' % (error))
+        sys.exit(1)
+    
     return control_socket
 
 def send_message(any_socket, message):
@@ -35,9 +35,8 @@ def get_file(control_socket, file_name, server_address):
 
     if response.startswith('PORT'):
         port_number = response.split()[1]
-        print(port_number)
         ephPort = int(port_number)
-        print(f'Attempt to connect to port {ephPort}')
+        print(f'Attempting to connect to port {ephPort}...')
         ephSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         ephSocket.connect((server_address, ephPort))
         response = receive_message(ephSocket)
@@ -57,6 +56,7 @@ def get_file(control_socket, file_name, server_address):
                     bytes_received += len(data)
             
             print(f'{file_name} downloaded successfully.')
+            send_message(ephSocket, 'STOP')
 
         ephSocket.close()
     else:
@@ -71,15 +71,14 @@ def put_file(control_socket, file_name, server_address):
 
         if response.startswith('PORT'):
             port_number = response.split()[1]
-            print(port_number)
             ephPort = int(port_number)
-            print(f'Attempt to connect to port {ephPort}')
+            print(f'Attempting to connect to port {ephPort}...')
             ephSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             ephSocket.connect((server_address, ephPort))
             print(f'Connected, uploading {file_name} ({int(file_size)} bytes)...')
             response = receive_message(ephSocket)
             
-            if response.startswith('READY'):
+            if response == 'START':
                 send_message(ephSocket, str(file_size))
 
                 with open(file_name, 'rb') as file:
@@ -92,6 +91,7 @@ def put_file(control_socket, file_name, server_address):
                         ephSocket.send(data)
             
                 print(f'{file_name} uploaded successfully.')
+                send_message(control_socket, 'STOP')
             else:
                 print(response)
         
@@ -106,15 +106,15 @@ def list_files(control_socket, server_address):
 
     if response.startswith('PORT'):
         port_number = response.split()[1]
-        print(f'Port {port_number}')
         ephPort = int(port_number)
-        print(f'Attempt to connect to port {ephPort}')
+        print(f'Attempting to connect to port {ephPort}...')
         ephSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         ephSocket.connect((server_address, ephPort))
-        print(f'Connected, listing out the files in the server...')
-        
         response = receive_message(ephSocket)
-        print(response)
+
+        if response.startswith('START'):
+            print(f'Connected, listing out the files in the server...\n{" ".join(response.split()[1:])}')
+            send_message(ephSocket, 'STOP')
 
         ephSocket.close()
 
@@ -126,10 +126,14 @@ def quit(control_socket):
 
 def main():
     if len(sys.argv) != 3:
-        print('Usage: python3 client.py <server_address> <server_port>')
+        print('Usage: python3 client.py <server machine> <server port>')
         sys.exit(1)
     
-    server_address = sys.argv[1]
+    try:
+        server_machine = socket.gethostbyname(sys.argv[1]) 
+    except socket.gaierror: 
+        print ('Error: Host could not be resolved.')
+        sys.exit(1) 
 
     try:
         server_port = int(sys.argv[2])
@@ -138,45 +142,44 @@ def main():
         sys.exit(1)
    
     print(f'Connecting with server on port {server_port}...')
-    control_socket = connect_to_server(server_address, server_port)
+    control_socket = connect_to_server(server_machine, server_port)
     send_message(control_socket, 'CONNECT')
 
     if(receive_message(control_socket) == 'READY'):
-        print('Server is ready')
+        print('Server is ready.')
 
         while True:
             command = input('ftp> ').strip().split()
-            print(len(command))
             
             if not command:
                 continue
             elif command[0].lower() == 'put':
                 if(len(command) == 2):
                     file_name = command[1]
-                    put_file(control_socket, file_name, server_address)
+                    put_file(control_socket, file_name, server_machine)
                 else:
                     print('ERROR: Please write the command in the format of "put <fileName>".')
             elif command[0].lower() == 'get':
                 if(len(command) == 2):
                     file_name = command[1]
-                    get_file(control_socket, file_name, server_address)
+                    get_file(control_socket, file_name, server_machine)
                 else:
                     print('ERROR: Please write the command in the format of "get <fileName>".')
             elif command[0].lower() == 'ls':
                 if(len(command) == 1):
-                    list_files(control_socket, server_address)
+                    list_files(control_socket, server_machine)
                 else:
-                    print("Error")
+                    print('ERROR: Please write the command in the format of "ls".')
             elif command[0].lower() == 'quit':
                 if(len(command) == 1):
                     quit(control_socket)
                     break
                 else:
-                    print("error")
+                    print('ERROR: Please write the command in the format of "quit".')
             else:
                 print('ERROR: Invalid command. Valid commands are "ls, get, put, quit".')
     else:
-        print(f'Failed to connect with server on port {server_port}')
+        print(f'Failed to connect with server on port {server_port}.')
 
 if __name__ == '__main__':
     main()

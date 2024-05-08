@@ -13,8 +13,9 @@ def start_server(server_port):
 
     while True:
         control_socket, client_address = server_socket.accept()
+        response = receive_message(control_socket)
 
-        if(receive_message(control_socket) == 'CONNECT'):
+        if response == 'CONNECT':
             print(f'Connection established with {client_address}')
             send_message(control_socket, 'READY')
             handle_client(control_socket, client_address)
@@ -38,7 +39,7 @@ def handle_client(control_socket, client_address):
 
         if command.lower() == 'quit':
             send_message(control_socket, 'Goodbye.')
-            print(f'Client {client_address} is leaving')
+            print(f'\nClient {client_address} is leaving\nSUCCESS of "quit" command\n')
             break
         elif command.lower().startswith('get'):
             _, file_name = command.split(maxsplit=1)
@@ -51,8 +52,6 @@ def handle_client(control_socket, client_address):
 
 def send_file(control_socket, file_name):
     """Send a file to the client"""
-    print("In send_file function")
-    
     if os.path.isfile(os.path.join('files', file_name)):
         # Establish a new data channel
         data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -63,15 +62,12 @@ def send_file(control_socket, file_name):
         send_message(control_socket, f'PORT {data_port}')
 
         data_connection, data_address = data_socket.accept()
-        print(f'Data connection established with {data_address} for {file_name}')
+        print(f'\nData connection established with {data_address} for {file_name}')
 
         send_message(data_connection, f'FILE {file_name} {os.path.getsize(os.path.join("files", file_name))}')
         response = receive_message(data_connection)
-        print("Data_socket good in send_file")
 
         if response == 'START':
-            print("It good")
-
             with open(os.path.join('files', file_name), 'rb') as file:
                 while True:
                     data = file.read(BUFFER_SIZE)
@@ -84,7 +80,11 @@ def send_file(control_socket, file_name):
             #send_message(data_connection, 'SUCCESS File sent.')
         else:
             send_message(data_connection, 'FAILURE Failed to start file transfer.')
-        
+
+        response = receive_message(data_connection)
+        output = 'SUCCESS of "get" command' if response == 'STOP' else 'FAILURE of "get" command'
+        print(output)
+
         data_connection.close()
         data_socket.close()
     else:
@@ -101,9 +101,9 @@ def receive_file(control_socket, file_name):
     send_message(control_socket, f'PORT {data_port}')
 
     data_connection, data_address = data_socket.accept()
-    print(f'Data connection established with {data_address} for {file_name}')
+    print(f'\nData connection established with {data_address} for {file_name}')
 
-    send_message(data_connection, 'READY')
+    send_message(data_connection, 'START')
     file_size = int(receive_message(data_connection))
     bytes_received = 0
     #send_message(control_socket, 'START ')
@@ -113,6 +113,10 @@ def receive_file(control_socket, file_name):
             data = data_connection.recv(BUFFER_SIZE)
             file.write(data)
             bytes_received += len(data)
+    
+    response = receive_message(control_socket)
+    output = 'SUCCESS of "put" command' if response == 'STOP' else 'FAILURE of "put" command'
+    print(output)
     
     data_connection.close()
     data_socket.close()
@@ -129,11 +133,14 @@ def list_files(control_socket):
     send_message(control_socket, f'PORT {data_port}')
 
     data_connection, data_address = data_socket.accept()
-    print(f'Data connection established with {data_address}')
+    print(f'\nData connection established with {data_address} for listing files')
 
     file_list = ' '.join(os.listdir(os.path.join(os.getcwd(), 'files')))
-    print(file_list)
-    send_message(data_connection, file_list)
+    send_message(data_connection, f'START {file_list}')
+
+    response = receive_message(data_connection)
+    output = 'SUCCESS of "ls" command' if response == 'STOP' else 'FAILURE of "ls" command'
+    print(output)
 
     data_connection.close()
     data_socket.close()
@@ -146,7 +153,7 @@ def main():
     try:
         port = int(sys.argv[1])
     except ValueError:
-        print('Error: Port must be an integer.')
+        print('Error: Port must be an integer')
         sys.exit(1)
 
     start_server(port)
