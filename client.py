@@ -146,7 +146,7 @@ def main():
     send_message(control_socket, 'CONNECT')
 
     if(receive_message(control_socket) == 'READY'):
-        print('Server is ready.')
+        print('Connected, server is ready.')
 
         while True:
             command = input('ftp> ').strip().split()

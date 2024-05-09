@@ -1,6 +1,7 @@
 import socket
 import os
 import sys
+import threading
 
 BUFFER_SIZE = 1024
 
@@ -8,21 +9,24 @@ def start_server(server_port):
     """Main function to start the server"""
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind(('', server_port))
-    server_socket.listen(1)
+    server_socket.listen()
     print(f'Server listening on port {server_port}...')
 
     while True:
-        control_socket, client_address = server_socket.accept()
-        response = receive_message(control_socket)
-
-        if response == 'CONNECT':
-            print(f'Connection established with {client_address}')
-            send_message(control_socket, 'READY')
-            handle_client(control_socket, client_address)
-            control_socket.close()
-        else:
-            print(f'Failed to connect with {client_address}')
-            send_message(control_socket, 'FAILURE')
+        try:
+            control_socket, client_address = server_socket.accept()
+            response = receive_message(control_socket)
+            
+            if response == 'CONNECT':
+                print(f'\nConnection established with {client_address}')
+                send_message(control_socket, 'READY')
+                client_thread = threading.Thread(target=handle_client, args=(control_socket, client_address))
+                client_thread.start()
+            else:
+                print(f'Failed to connect with {client_address}')
+                send_message(control_socket, 'FAILURE')
+        except socket.error as error:
+            print('Failed to accept client connection:', error)
 
 def send_message(any_socket, message):
     """Sends message through given socket"""
@@ -39,7 +43,7 @@ def handle_client(control_socket, client_address):
 
         if command.lower() == 'quit':
             send_message(control_socket, 'Goodbye.')
-            print(f'\nClient {client_address} is leaving\nSUCCESS of "quit" command\n')
+            print(f'\nClient {client_address} is leaving\nSUCCESS of "quit" command')
             break
         elif command.lower().startswith('get'):
             _, file_name = command.split(maxsplit=1)
@@ -50,12 +54,13 @@ def handle_client(control_socket, client_address):
         else:
             list_files(control_socket)
 
+    control_socket.close()
+
 def send_file(control_socket, file_name):
     """Send a file to the client"""
     if os.path.isfile(os.path.join('files', file_name)):
-        # Establish a new data channel
         data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        data_socket.bind(('', 0))  # Bind to an ephemeral port
+        data_socket.bind(('', 0)) 
         data_socket.listen(1)
 
         data_port = data_socket.getsockname()[1]
@@ -76,8 +81,6 @@ def send_file(control_socket, file_name):
                         break
                     
                     data_connection.send(data)
-
-            #send_message(data_connection, 'SUCCESS File sent.')
         else:
             send_message(data_connection, 'FAILURE Failed to start file transfer.')
 
@@ -92,9 +95,8 @@ def send_file(control_socket, file_name):
 
 def receive_file(control_socket, file_name):
     """Receive a file from the client"""
-    # Establish a new data channel
     data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    data_socket.bind(('', 0))  # Bind to an ephemeral port
+    data_socket.bind(('', 0)) 
     data_socket.listen(1)
 
     data_port = data_socket.getsockname()[1]
@@ -106,7 +108,6 @@ def receive_file(control_socket, file_name):
     send_message(data_connection, 'START')
     file_size = int(receive_message(data_connection))
     bytes_received = 0
-    #send_message(control_socket, 'START ')
 
     with open(os.path.join('files', file_name), 'wb') as file:
         while bytes_received < file_size:
@@ -120,13 +121,11 @@ def receive_file(control_socket, file_name):
     
     data_connection.close()
     data_socket.close()
-    #send_message(control_socket, 'SUCCESS File received.')
 
 def list_files(control_socket):
     """Send a list of files to the client"""
-    # Establish a new data channel
     data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    data_socket.bind(('', 0))  # Bind to an ephemeral port
+    data_socket.bind(('', 0)) 
     data_socket.listen(1)
 
     data_port = data_socket.getsockname()[1]
