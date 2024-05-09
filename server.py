@@ -7,7 +7,12 @@ BUFFER_SIZE = 1024
 
 def start_server(server_port):
     """Main function to start the server"""
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    except socket.error as error:
+        print('Socket creation failed with error %s.' % (error))
+        sys.exit(1)
+        
     server_socket.bind(('', server_port))
     server_socket.listen()
     print(f'Server listening on port {server_port}...')
