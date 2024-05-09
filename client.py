@@ -97,7 +97,7 @@ def put_file(control_socket, file_name, server_address):
         
             ephSocket.close()
     else:
-        print(f'Error: {file_name} not found.')
+        print(f'FAILURE: File not found.')
 
 def list_files(control_socket, server_address):
     """Request a list of files from the server"""

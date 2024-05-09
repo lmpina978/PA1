@@ -91,7 +91,7 @@ def send_file(control_socket, file_name):
         data_connection.close()
         data_socket.close()
     else:
-        send_message(control_socket, 'FAILURE File not found.')
+        send_message(control_socket, 'FAILURE: File not found.')
 
 def receive_file(control_socket, file_name):
     """Receive a file from the client"""

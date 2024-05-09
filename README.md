@@ -67,5 +67,5 @@ Client quits the server by closing the control connection between the client and
 ## Anything Special About Submission:
 
 - Has unit tests using .txt files in order to reinforce data partitioning, three for client unit test, five for server unit test
-- Running the `client.py` and `server.py` files will require being in the same directory where the `files` folder is located in order to properly retrieve and upload files
+- Running the `client.py` and `server.py` files will require being in the same directory where the `files` folder is located in order to properly download and upload files
 - Requires Python 3.9.6 or greater
